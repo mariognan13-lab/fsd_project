@@ -288,6 +288,7 @@ def _bbox_around(lat, lng, radius_m):
 def _segment_popup(feature):
     rows = [
         ("Road", feature.get("name") or "Unnamed segment"),
+        ("Data", "SIMULATED seed data — not live traffic" if feature.get("simulated") else None),
         ("Level", _traffic_mark(feature.get("congestionLevel"))[0] or "No traffic"),
         ("Observed speed", _unit(feature.get("observedSpeed"), "km/h")),
         ("Free-flow speed", _unit(feature.get("freeFlowSpeed"), "km/h")),

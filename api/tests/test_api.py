@@ -195,7 +195,8 @@ def test_routes_validation_and_not_configured():
     summary = api.get(f"/api/summary?bbox={BBOX}")
     assert summary.json()["congestedCount"] == 1
 
-    unconfigured = TestClient(create_app({"config": base_config()}), raise_server_exceptions=False)
+    config["simulateTraffic"] = False
+    unconfigured = TestClient(create_app({"config": config}), raise_server_exceptions=False)
     response = unconfigured.get(f"/api/traffic?bbox={BBOX}")
     assert response.status_code == 503
     assert response.json()["error"]["code"] == "NOT_CONFIGURED"
@@ -331,3 +332,29 @@ def test_tomtom_places():
 
 
 from fastapi.testclient import TestClient  # noqa: E402
+
+
+def test_seed_traffic_is_deterministic_and_marked_simulated():
+    from app.seed_traffic import SeedTrafficProvider
+
+    bbox = {"west": 77.55, "south": 12.95, "east": 77.62, "north": 13.00}
+    first = SeedTrafficProvider().fetch_flow(bbox)
+    second = SeedTrafficProvider().fetch_flow(bbox)
+    assert first == second
+    assert first["source"] == "seed-simulation"
+    assert len(first["features"]) == 12
+    assert all(feature["simulated"] is True for feature in first["features"])
+    assert all(feature["observationBasis"] == "simulated" for feature in first["features"])
+
+
+def test_unconfigured_traffic_uses_seed_data():
+    config = base_config()
+    config["simulateTraffic"] = True
+    api = TestClient(create_app({"config": config}), raise_server_exceptions=False)
+    response = api.get(f"/api/traffic?bbox={BBOX}")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["source"] == "seed-simulation"
+    assert body["simulated"] is True
+    assert "not live traffic" in body["coverageNote"]
+

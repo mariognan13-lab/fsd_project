@@ -5,6 +5,8 @@ from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from .seed_traffic import SeedTrafficProvider
+
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 
 from .config import get_config, public_config
@@ -48,6 +50,11 @@ def create_app(overrides=None):
         config["trafficStaleMaxAgeMs"],
         persist_snapshots if config["persistTrafficSnapshots"] else None,
     )
+    live_traffic_key = config.get("trafficApiKey") or (config.get("tomtomApiKey") if config.get("trafficProvider") == "tomtom" else "")
+    if config.get("simulateTraffic", True) and not live_traffic_key:
+        traffic = TrafficService(
+            SeedTrafficProvider(), health, config["trafficCacheTtlMs"], config["trafficStaleMaxAgeMs"]
+        )
     tomtom_places = overrides.get("tomtom_places") or (
         TomTomPlacesClient(http, config["tomtomApiKey"], config.get("tomtomSearchBaseUrl", "https://api.tomtom.com/search/2"))
         if config.get("tomtomApiKey")

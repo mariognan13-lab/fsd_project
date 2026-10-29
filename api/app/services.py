@@ -120,16 +120,13 @@ class TrafficService:
                 "attribution": result.get("attribution"),
                 "omittedCount": result.get("omittedCount") or 0,
                 "features": result["features"],
-                "coverageNote": (
-                    "Segments are limited to the requested bounds and the configured HERE functional classes. "
-                    "A missing road means HERE did not return it for this request, not that traffic is free-flowing."
+                "simulated": bool(result.get("simulated")),
+                "coverageNote": "Deterministic seed data for demonstration only. Traffic conditions are simulated and do not represent current road conditions." if result.get("simulated") else (
+                    "Segments are limited to the requested bounds and the configured HERE functional classes. A missing road means HERE did not return it for this request, not that traffic is free-flowing."
                     if self.provider.id == "here"
-                    else (
-                        "Segments are limited to the requested bounds and the map zoom level. "
-                        "A missing road means TomTom did not return flow for it at this zoom, not that traffic is free-flowing."
-                        if self.provider.id == "tomtom"
-                        else None
-                    )
+                    else "Segments are limited to the requested bounds and map zoom. A missing road means TomTom did not return flow for it, not that traffic is free-flowing."
+                    if self.provider.id == "tomtom"
+                    else None
                 ),
             }
             self.cache.set(key, {"storedAt": time.time(), "payload": payload})

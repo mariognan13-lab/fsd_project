@@ -61,50 +61,24 @@ The frontend is in `frontend/` and provides a responsive, clean UI:
   - `TRAFFIC_API_KEY` - Required for live HERE traffic
   - `TOMTOM_API_KEY` - Required for live TomTom traffic (falls back to `TRAFFIC_API_KEY`); `TOMTOM_ZOOM` and `TOMTOM_GRID` tune coverage
   - `MONGODB_URI` - Optional, needed for saving places
+  - `SIMULATE_TRAFFIC` - Defaults to `true`; when no live traffic key is configured, deterministic seed traffic is rendered so the map remains useful. Set to `false` to preserve the not-configured response.
+
   - `OVERPASS_URLS` - Overpass API endpoints
   - `NOMINATIM_BASE_URL` - Nominatim geocoding endpoint
   - `HERE_API_BASE_URL` - HERE Traffic API base URL
   - Defaults for port, location, zoom, etc.
 
-## Deployment (Railway)
+## Deployment (Render)
 
-Configuration in `Railway.toml`:
+The repository includes a Render Blueprint in `render.yaml` for two web services:
 
-```toml
-[build]
-  command = "npm run build"
-  publish = "frontend/out"
+- `trafficiq-api`: FastAPI backend with `/api/health` as its health check.
+- `trafficiq-web`: Next.js frontend, proxying API requests to the backend.
 
-[deploy]
-  start_command = "uvicorn api.app.main:app --host 0.0.0.0 --port $PORT"
-  healthcheck_path = "/api/health"
-  healthcheck_timeout = 30
-  healthcheck_attempts = 10
+Deploy from the Render dashboard by selecting **New → Blueprint** and connecting this repository, or with the Render CLI if it is installed and authenticated. Render will prompt for the secret `TOMTOM_API_KEY`; `MONGODB_URI` is optional. `SIMULATE_TRAFFIC=true` keeps deterministic traffic available when no live key is configured.
 
-[env]
-  PORT = "$PORT"
-  MONGODB_URI = "${MONGODB_URI}"
-  TRAFFIC_PROVIDER = "here"
-  TRAFFIC_API_KEY = "${TRAFFIC_API_KEY}"
-  OVERPASS_URLS = "https://overpass-api.de/api/interpreter,https://overpass.kumi.systems/api/interpreter"
-  NOMINATIM_BASE_URL = "https://nominatim.openstreetmap.org"
-  HERE_API_BASE_URL = "https://data.traffic.hereapi.com/v7"
-  HERE_FUNCTIONAL_CLASSES = "1,2,3,4"
-  DEFAULT_LAT = "16.5125"
-  DEFAULT_LNG = "80.653"
-  DEFAULT_ZOOM = "14"
-  DEFAULT_LABEL = "Kanuru–Vijayawada"
-  APP_USER_AGENT = "TrafficIQ/1.0 (local development overpass client)"
-  REQUEST_TIMEOUT_MS = "20000"
-  OVERPASS_TIMEOUT_MS = "45000"
-  TRAFFIC_CACHE_TTL_MS = "30000"
-  TRAFFIC_STALE_MAX_AGE_MS = "900000"
-  PLACES_CACHE_TTL_MS = "600000"
-  PLACES_STALE_MAX_AGE_MS = "1800000"
-  MAX_BBOX_SPAN_DEGREES = "0.22"
-  SERVE_CLIENT = "false"
-  CLIENT_ORIGIN = "https://your-app.up.railway.app"
-```
+After deployment, set `CLIENT_ORIGIN` on `trafficiq-api` to the public `trafficiq-web` URL if Render does not resolve the service reference automatically.
+
 
 ## Run Locally
 

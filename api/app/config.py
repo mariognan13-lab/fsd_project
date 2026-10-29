@@ -65,6 +65,8 @@ def get_config():
         "trafficApiKey": os.environ.get("TRAFFIC_API_KEY", ""),
         "hereApiBaseUrl": os.environ.get("HERE_API_BASE_URL", "https://data.traffic.hereapi.com/v7"),
         "hereFunctionalClasses": os.environ.get("HERE_FUNCTIONAL_CLASSES", "1,2,3,4"),
+        "simulateTraffic": os.environ.get("SIMULATE_TRAFFIC", "true").lower() == "true",
+
         "tomtomApiKey": (os.environ.get("TOMTOM_API_KEY", "") or os.environ.get("TRAFFIC_API_KEY", "")).strip("\"'"),
         "tomtomBaseUrl": os.environ.get("TOMTOM_BASE_URL", "https://api.tomtom.com/traffic/services"),
         "tomtomSearchBaseUrl": os.environ.get("TOMTOM_SEARCH_BASE_URL", "https://api.tomtom.com/search/2"),
@@ -118,6 +120,8 @@ def public_config(config=None):
         "defaultLabel": config["defaultLabel"],
         "trafficPollIntervalMs": config["trafficPollIntervalMs"],
         "trafficProvider": config["trafficProvider"],
+         "trafficSimulationEnabled": config.get("simulateTraffic", True),
+
         "trafficConfigured": traffic_configured,
         "maxBboxSpanDegrees": config["maxBboxSpanDegrees"],
         "eateryRadii": config["eateryRadii"],
