@@ -346,10 +346,17 @@ def test_seed_traffic_is_deterministic_and_marked_simulated():
     assert all(feature["simulated"] is True for feature in first["features"])
     assert all(feature["observationBasis"] == "simulated" for feature in first["features"])
 
+def test_simulated_traffic_is_not_drawn_as_map_overlay():
+    from app.dashboard import _visible_traffic_features
+
+    simulated = {**FEATURE, "simulated": True}
+    assert _visible_traffic_features([simulated]) == []
+    assert _visible_traffic_features([FEATURE, simulated]) == [FEATURE]
 
 def test_unconfigured_traffic_uses_seed_data():
     config = base_config()
     config["simulateTraffic"] = True
+
     api = TestClient(create_app({"config": config}), raise_server_exceptions=False)
     response = api.get(f"/api/traffic?bbox={BBOX}")
     assert response.status_code == 200

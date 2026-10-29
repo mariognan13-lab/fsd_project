@@ -18,6 +18,12 @@ COLORS = {
 MAX_RADIUS_KM = 500
 
 
+
+def _visible_traffic_features(features):
+    """Do not draw synthetic fallback lines over real road maps."""
+    return [feature for feature in features if not feature.get("simulated")]
+
+
 def render_dashboard(bundle, params):
     config = bundle["config"]
     center = {"lat": config["defaultLat"], "lng": config["defaultLng"]}
@@ -128,19 +134,7 @@ def render_dashboard(bundle, params):
         label = {"traffic": "Traffic on this route", "medium": "Medium traffic on this route"}.get(route_state, "Route")
         folium.PolyLine(driving["line"], color=route_color, weight=7, opacity=0.95, popup=label).add_to(frame)
         frame.fit_bounds(driving["line"])
-    if not driving:
-        for feature in features:
-            points = [[point[1], point[0]] for point in feature["geometry"]["coordinates"]]
-            _name, color = _traffic_mark(feature.get("congestionLevel"))
-            if not color:
-                continue
-            folium.PolyLine(
-                points,
-                color=color,
-                weight=6 if selected and selected["id"] == feature["id"] else 5,
-                opacity=0.9,
-                popup=folium.Popup(_segment_popup(feature), max_width=320),
-            ).add_to(frame)
+
     for toll in toll_rows:
         folium.Marker(
             [toll["lat"], toll["lng"]],

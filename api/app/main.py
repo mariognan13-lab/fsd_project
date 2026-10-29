@@ -17,6 +17,7 @@ from .http import HttpxClient
 from .nominatim import NominatimGeocoder
 from .overpass import OverpassClient
 from .persistence import connect, connected, corridors, persist_snapshots, persist_status, places, require_db
+from .routing import fetch_driving_route
 from .services import HealthService, PlacesService, TollService, TrafficService
 from .summary import summarize_traffic
 from .tomtom import TomTomPlacesClient
@@ -140,6 +141,18 @@ def create_app(overrides=None):
             "route": route,
             "embed": embed,
         })
+
+    @app.get("/api/route")
+    def route_api(origin_lat: str = "", origin_lng: str = "", dest_lat: str = "", dest_lng: str = ""):
+        origin = dict(zip(("lat", "lng"), parse_lat_lng(origin_lat, origin_lng)))
+        destination = dict(zip(("lat", "lng"), parse_lat_lng(dest_lat, dest_lng)))
+        return fetch_driving_route(
+            http,
+            origin,
+            destination,
+            config["requestTimeoutMs"] / 1000,
+            config["appUserAgent"],
+        )
 
     @app.get("/api/config/public")
     def config_route():

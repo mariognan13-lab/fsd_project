@@ -75,5 +75,89 @@ services:
           type: web
           name: trafficiq-api
           property: host
+      - key: NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN
+        sync: false
+      - key: BACKEND_TIMEOUT_MS
+        value: "90000"
+
+      - key: PYTHON_VERSION
+        value: 3.12.8
+      - key: SERVE_CLIENT
+        value: "false"
+      - key: TRAFFIC_PROVIDER
+        value: tomtom
+      - key: SIMULATE_TRAFFIC
+        value: "true"
+      - key: TOMTOM_API_KEY
+        sync: false
+      - key: MONGODB_URI
+      - key: NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN
+        sync: false
+
+        sync: false
+      - key: CLIENT_ORIGIN
+        fromService:
+          type: web
+          name: trafficiq-web
+          property: host
+      - key: OVERPASS_URLS
+        value: https://overpass-api.de/api/interpreter,https://overpass.kumi.systems/api/interpreter
+      - key: NOMINATIM_BASE_URL
+        value: https://nominatim.openstreetmap.org
+      - key: HERE_API_BASE_URL
+        value: https://data.traffic.hereapi.com/v7
+      - key: HERE_FUNCTIONAL_CLASSES
+        value: 1,2,3,4
+      - key: DEFAULT_LAT
+        value: "16.5125"
+      - key: DEFAULT_LNG
+        value: "80.653"
+      - key: DEFAULT_ZOOM
+        value: "14"
+      - key: DEFAULT_LABEL
+        value: Kanuru–Vijayawada
+      - key: APP_USER_AGENT
+        value: TrafficIQ/1.0 (Render deployment)
+      - key: REQUEST_TIMEOUT_MS
+        value: "20000"
+      - key: OVERPASS_TIMEOUT_MS
+        value: "45000"
+      - key: TRAFFIC_CACHE_TTL_MS
+        value: "30000"
+      - key: TRAFFIC_STALE_MAX_AGE_MS
+        value: "900000"
+      - key: PLACES_CACHE_TTL_MS
+        value: "600000"
+      - key: PLACES_STALE_MAX_AGE_MS
+        value: "1800000"
+      - key: MAX_BBOX_SPAN_DEGREES
+        value: "0.22"
+
+  - type: web
+    name: trafficiq-web
+    runtime: node
+    plan: free
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    startCommand: npm run start -- --hostname 0.0.0.0 --port $PORT
+    envVars:
+      - key: BACKEND_URL
+        fromService:
+          type: web
+          name: trafficiq-api
+          property: host
+      - key: NEXT_PUBLIC_BACKEND_URL
+        fromService:
+          type: web
+          name: trafficiq-api
+          property: host
+      - key: NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN
+        sync: false
+      - key: BACKEND_TIMEOUT_MS
+
+
+      - key: NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN
+        sync: false
+
       - key: BACKEND_TIMEOUT_MS
         value: "90000"

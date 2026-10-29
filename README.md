@@ -6,6 +6,10 @@ College project for viewing traffic and congestion around a city. The applicatio
 
 - **Backend**: FastAPI (Python) - all API routes, traffic providers, geocoding, Overpass queries
 - **Frontend**: Next.js 16 with React 19 - responsive dashboard UI, map controls, forms
+- **Map**: Mapbox GL JS when `NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN` is configured; Folium remains the fallback.
+
+- **Map**: Mapbox GL JS (when `NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN` is configured), with the existing Folium map as a no-token fallback
+
 - **Map**: Folium (Python) generates HTML that Next.js renders in an iframe
 - **Data**: OpenStreetMap Overpass (toll plazas, eateries), HERE Traffic API v7 or TomTom Traffic Flow (live flow), Nominatim (geocoding)
 - **Deployment**: Railway
@@ -76,6 +80,9 @@ The repository includes a Render Blueprint in `render.yaml` for two web services
 - `trafficiq-web`: Next.js frontend, proxying API requests to the backend.
 
 Deploy from the Render dashboard by selecting **New → Blueprint** and connecting this repository, or with the Render CLI if it is installed and authenticated. Render will prompt for the secret `TOMTOM_API_KEY`; `MONGODB_URI` is optional. `SIMULATE_TRAFFIC=true` keeps deterministic traffic available when no live key is configured.
+
+
+For Mapbox, set `NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN` on the `trafficiq-web` service in Render (and in `frontend/.env.local` for local development). This is a browser-public token: restrict it to your deployed site origins in the Mapbox account. The Folium map remains available when the variable is unset.
 
 After deployment, set `CLIENT_ORIGIN` on `trafficiq-api` to the public `trafficiq-web` URL if Render does not resolve the service reference automatically.
 
