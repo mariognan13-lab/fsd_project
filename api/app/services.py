@@ -237,6 +237,17 @@ class PlacesService:
                     if self.health:
                         self.health.mark_failure("places", "tomtom", tomtom_err)
 
+            try:
+                data = self.overpass.query(eatery_query(lat, lng, radius))
+                normalized = normalize_eateries(data["elements"], {"lat": lat, "lng": lng})
+            except Exception as overpass_err:
+                if not (self.tomtom and getattr(self.tomtom, "api_key", None)):
+                    raise
+                if self.health:
+                    self.health.mark_failure("places", "overpass", overpass_err)
+                normalized = self.tomtom.search_nearby(lat, lng, radius, category)
+            places = normalized["places"]
+
             data = self.overpass.query(eatery_query(lat, lng, radius))
             normalized = normalize_eateries(data["elements"], {"lat": lat, "lng": lng})
             places = normalized["places"]
