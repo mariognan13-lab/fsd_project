@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
@@ -32,11 +32,11 @@ export default function LoginPage() {
             <p className="text-xs font-bold uppercase tracking-widest text-blue-400">Welcome back</p>
             <h2 className="mt-2 text-2xl font-bold">Sign in to Traffic IQ</h2>
             <p className="mt-2 text-sm text-slate-400">Enter any details to continue to the workspace.</p>
-            <form onSubmit={submit} className="mt-8 space-y-5">
+            <form onSubmit={submit} action={() => router.push("/")} className="mt-8 space-y-5">
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-400">Work email<input type="email" placeholder="you@company.com" className="mt-2 h-12 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 text-sm text-white outline-none focus:border-blue-500" /></label>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-400">Password<span className="relative mt-2 block"><input type={visible ? "text" : "password"} placeholder="Enter your password" className="h-12 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 pr-16 text-sm text-white outline-none focus:border-blue-500" /><button type="button" onClick={() => setVisible(!visible)} className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-500">{visible ? "Hide" : "Show"}</button></span></label>
               <label className="text-xs text-slate-400"><input type="checkbox" defaultChecked className="mr-2 accent-blue-500" />Remember me</label>
-              <button type="submit" className="h-12 w-full rounded-xl bg-blue-500 text-sm font-bold text-white">Sign in to workspace</button>
+              <button type="submit" onClick={(e) => { e.preventDefault(); router.push("/"); }} className="h-12 w-full rounded-xl bg-blue-500 text-sm font-bold text-white">Sign in to workspace</button>
             </form>
             <p className="mt-7 text-center text-sm text-slate-500">Need an account? <button type="button" className="font-bold text-blue-400">Request access</button></p>
           </div>

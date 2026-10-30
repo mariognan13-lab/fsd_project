@@ -121,7 +121,7 @@ class TrafficService:
                 "omittedCount": result.get("omittedCount") or 0,
                 "features": result["features"],
                 "simulated": bool(result.get("simulated")),
-                "coverageNote": "Deterministic seed data for demonstration only. Traffic conditions are simulated and do not represent current road conditions." if result.get("simulated") else (
+                "coverageNote": "Deterministic seed data for demonstration only (not live traffic). Traffic conditions are simulated and do not represent current road conditions." if result.get("simulated") else (
                     "Segments are limited to the requested bounds and the configured HERE functional classes. A missing road means HERE did not return it for this request, not that traffic is free-flowing."
                     if self.provider.id == "here"
                     else "Segments are limited to the requested bounds and map zoom. A missing road means TomTom did not return flow for it, not that traffic is free-flowing."
@@ -246,10 +246,6 @@ class PlacesService:
                 if self.health:
                     self.health.mark_failure("places", "overpass", overpass_err)
                 normalized = self.tomtom.search_nearby(lat, lng, radius, category)
-            places = normalized["places"]
-
-            data = self.overpass.query(eatery_query(lat, lng, radius))
-            normalized = normalize_eateries(data["elements"], {"lat": lat, "lng": lng})
             places = normalized["places"]
             return {
                 "source": normalized["source"],

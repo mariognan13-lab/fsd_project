@@ -195,6 +195,7 @@ def test_routes_validation_and_not_configured():
     summary = api.get(f"/api/summary?bbox={BBOX}")
     assert summary.json()["congestedCount"] == 1
 
+    config = base_config()
     config["simulateTraffic"] = False
     unconfigured = TestClient(create_app({"config": config}), raise_server_exceptions=False)
     response = unconfigured.get(f"/api/traffic?bbox={BBOX}")

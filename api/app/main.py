@@ -75,10 +75,28 @@ def create_app(overrides=None):
     )
     db_status = overrides.get("db_status") or (lambda: {"connected": connected(), "required": False})
 
+    allowed_origins = [config["clientOrigin"]] if config.get("clientOrigin") else []
+    if config.get("clientOrigin"):
+        origin = config["clientOrigin"]
+        if not origin.startswith("http://") and not origin.startswith("https://"):
+            allowed_origins.append(f"https://{origin}")
+            allowed_origins.append(f"http://{origin}")
+    for default_origin in [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:5050",
+        "http://127.0.0.1:5050",
+        "https://trafficiq-web.onrender.com",
+    ]:
+        if default_origin not in allowed_origins:
+            allowed_origins.append(default_origin)
+
     app = FastAPI(title="Traffic IQ")
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=[config["clientOrigin"]],
+        allow_origins=allowed_origins,
+        allow_origin_regex=r"https://.*\.onrender\.com",
+        allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
     )
@@ -106,7 +124,7 @@ def create_app(overrides=None):
         "http": http,
     }
 
-    @app.get("/", response_class=HTMLResponse)
+    @app.api_route("/", methods=["GET", "HEAD"], response_class=HTMLResponse)
     def dashboard(
         q: str = "",
         origin: str = "",
@@ -158,7 +176,8 @@ def create_app(overrides=None):
     def config_route():
         return public_config(config)
 
-    @app.get("/api/health")
+    @app.api_route("/health", methods=["GET", "HEAD"])
+    @app.api_route("/api/health", methods=["GET", "HEAD"])
     def liveness():
         return {"status": "ok", "service": "traffic-iq"}
 
@@ -360,14 +379,6 @@ def build_app():
         if index_path.exists() and not path.startswith("api"):
             return FileResponse(str(index_path))
         return JSONResponse(status_code=404, content={"error": "Not found"})
-
-    @app.post("/api/*")
-    async def api_post(path: str):
-        return JSONResponse(status_code=405, content={"error": "Method not allowed"})
-
-    @app.get("/api/*")
-    async def api_get(path: str):
-        return JSONResponse(status_code=405, content={"error": "Method not allowed"})
 
     return app
 
