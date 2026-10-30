@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import mapboxgl, { type GeoJSONSource, type Map as MapboxMap } from "mapbox-gl";
@@ -54,7 +54,7 @@ export default function MapContainer({ params }: MapContainerProps) {
         const response = await fetch(routeUrl, { signal: controller.signal });
         if (!response.ok) return;
         const route = await response.json() as RoutePayload;
-        const coordinates = (route.line || []).map(([lat, lng]) => [lng, lat]);
+        const coordinates: [number, number][] = (route.line || []).map(([lat, lng]): [number, number] => [lng, lat]);
         if (coordinates.length < 2) return;
         const data = { type: "Feature" as const, geometry: { type: "LineString" as const, coordinates }, properties: {} };
         const source = instance.getSource("route") as GeoJSONSource | undefined;
@@ -63,7 +63,12 @@ export default function MapContainer({ params }: MapContainerProps) {
           instance.addSource("route", { type: "geojson", data });
           instance.addLayer({ id: "route-line", type: "line", source: "route", paint: { "line-color": "#2563eb", "line-width": 6, "line-opacity": 0.9 } });
         }
-        instance.fitBounds(coordinates as [number, number][], { padding: 70, maxZoom: 15 });
+        const longitudes = coordinates.map(([lng]) => lng);
+        const latitudes = coordinates.map(([, lat]) => lat);
+        instance.fitBounds([
+          Math.min(...longitudes), Math.min(...latitudes),
+          Math.max(...longitudes), Math.max(...latitudes),
+        ], { padding: 70, maxZoom: 15 });
       } catch (error) {
         if (!(error instanceof Error && error.name === "AbortError")) console.error("Route unavailable", error);
       }
